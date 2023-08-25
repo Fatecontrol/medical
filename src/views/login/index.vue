@@ -1,19 +1,11 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+const router = useRouter()
+</script>
 <template>
-  <div>
-    <span
-      ><van-button type="primary">主要按钮</van-button>
-      <van-button type="success">成功按钮</van-button>
-      <van-button type="default">默认按钮</van-button>
-      <van-button type="warning">警告按钮</van-button>
-      <van-button type="danger">危险按钮</van-button></span
-    >
+  <div class="login">
+    <cp-nav-bar @click-right="router.push('/register')" right-text="注册"></cp-nav-bar>
   </div>
 </template>
 
-<script setup lang="ts"></script>
-
-<style lang="scss" scoped>
-a {
-  background: var(--main);
-}
-</style>
+<style lang="scss" scoped></style>
