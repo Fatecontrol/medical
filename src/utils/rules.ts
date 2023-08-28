@@ -7,4 +7,9 @@ const passwordRules = [
   { required: true, message: '请输入密码' },
   { pattern: /^\w{8,24}$/, message: '密码需8-24个字符' }
 ]
-export { mobileRules, passwordRules }
+// 验证码规则
+const codeRules = [
+  { required: true, message: '请输入密码' },
+  { pattern: /^\d{6}$/, message: '密码需8-24个字符' }
+]
+export { mobileRules, passwordRules, codeRules }

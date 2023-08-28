@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import { mobileRules, passwordRules } from '@/utils/rules'
-import { useRouter } from 'vue-router'
+import { mobileRules, passwordRules, codeRules } from '@/utils/rules'
+import { loginByPassword } from '@/services/user'
+import { useUserStore } from '@/stores'
+const store = useUserStore()
+import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
+const route = useRoute()
 import type { loginparamsRules } from '@/services/types/user'
 
 import { ref } from 'vue'
 import { showToast } from 'vant'
 const loginFrom = ref<loginparamsRules>({
   mobile: '13230000001',
-  password: 'abc12345'
+  password: 'abc12345',
+  code: ''
 })
 // 密码svg图标切换
 const show = ref<boolean>(false)
+// 初始化密码短信验证码切换状态
+const isPass = ref<boolean>(false)
 /* // 手机号
 const mobile = ref<string>('13230000001')
 // 密码
@@ -19,8 +26,22 @@ const password = ref<string>('abc12345') */
 // 协议状态
 const agree = ref<boolean>(false)
 // 登录方法
-const handlelogin = () => {
+const handlelogin = async () => {
   if (!agree.value) return showToast('请勾选我已同意')
+  // 第一种 不是因为token过期进入到登录页，而是我们打开项目自己进入登录页，没有携带当前页面的地址
+  // 第二种 token过期，自动跳转到登录页，，如果是第二种情况，会携带当前的页面地址
+  try {
+    delete loginFrom.value.code
+    const loginRes = await loginByPassword(loginFrom.value)
+    store.setUser(loginRes.data)
+    // console.log(loginRes)
+    // 跳转到主页
+    router.push((route.query.returnUrl as string) || '/user')
+    // 提示登录成功
+    showToast('登录成功')
+  } catch (error) {
+    console.log(error)
+  }
 }
 </script>
 <template>
@@ -29,8 +50,11 @@ const handlelogin = () => {
     <cp-nav-bar @click-right="router.push('/register')" right-text="注册"></cp-nav-bar>
     <!-- 头部 -->
     <div class="login__header">
-      <h3>密码登录</h3>
-      <a href="">短信验证码登录<van-icon name="arrow" /></a>
+      <h3>{{ isPass ? '短信验证码登录' : '密码登录' }}</h3>
+      <a href.prevent="#">
+        <span @click="isPass = !isPass">{{ isPass ? '密码登录' : '短信验证码登录' }}</span>
+        <van-icon name="arrow"
+      /></a>
     </div>
     <!-- form表单 -->
     <van-form :autocomplete="false" @submit="handlelogin">
@@ -45,9 +69,15 @@ const handlelogin = () => {
         :rules="passwordRules"
         :type="show ? 'text' : 'password'"
         placeholder="请输入密码"
+        v-if="!isPass"
       >
         <template #button>
           <cp-icons :name="`login-eye-${show ? 'on' : 'off'}`" @click="show = !show"></cp-icons>
+        </template>
+      </van-field>
+      <van-field v-model="loginFrom.code" :rules="codeRules" placeholder="请输入验证码" v-else>
+        <template #button>
+          <span class="btn-send" style="color: #16c2a3">发送验证码</span>
         </template>
       </van-field>
       <div class="cp__cell">
