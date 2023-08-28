@@ -7,11 +7,13 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
+      meta: { title: '登录' },
       component: () => import('../views/Login/index.vue')
     },
     {
       path: '/register',
       name: 'register',
+      meta: { title: '注册' },
       component: () => import('../views/Register/index.vue')
     },
     {

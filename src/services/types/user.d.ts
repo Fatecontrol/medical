@@ -3,7 +3,6 @@ export interface loginparamsRules {
   password: string
   code: string
 }
-
 /* export interface codeParams {
   mobile: string
   type: codeType
