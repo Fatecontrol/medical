@@ -10,6 +10,6 @@ const passwordRules = [
 // 验证码规则
 const codeRules = [
   { required: true, message: '请输入密码' },
-  { pattern: /^\d{6}$/, message: '密码需8-24个字符' }
+  { pattern: /^\d{6}$/, message: '验证码为6个字符' }
 ]
 export { mobileRules, passwordRules, codeRules }

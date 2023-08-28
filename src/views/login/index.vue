@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { showConfirmDialog } from 'vant'
 import { mobileRules, passwordRules, codeRules } from '@/utils/rules'
-import { loginByPassword } from '@/services/user'
+import { loginByPassword, sendMobileCode, loginByCode } from '@/services/user'
 import { useUserStore } from '@/stores'
 const store = useUserStore()
 import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
-import type { loginparamsRules } from '@/services/types/user'
-
 import { ref } from 'vue'
 import { showToast } from 'vant'
+import { onUnmounted } from 'vue'
+import type { loginparamsRules } from '@/services/types/user'
 const loginFrom = ref<loginparamsRules>({
   mobile: '13230000001',
   password: 'abc12345',
@@ -31,18 +32,54 @@ const handlelogin = async () => {
   // 第一种 不是因为token过期进入到登录页，而是我们打开项目自己进入登录页，没有携带当前页面的地址
   // 第二种 token过期，自动跳转到登录页，，如果是第二种情况，会携带当前的页面地址
   try {
-    delete loginFrom.value.code
-    const loginRes = await loginByPassword(loginFrom.value)
+    // 根据isPass值 为fasle 密码登录  为true 短信验证码登录
+    const loginRes = isPass.value
+      ? await loginByCode(loginFrom.value.mobile, loginFrom.value.code)
+      : await loginByPassword(loginFrom.value.mobile, loginFrom.value.password)
     store.setUser(loginRes.data)
+
     // console.log(loginRes)
     // 跳转到主页
-    router.push((route.query.returnUrl as string) || '/user')
+    router.replace((route.query.returnUrl as string) || '/user')
     // 提示登录成功
     showToast('登录成功')
   } catch (error) {
     console.log(error)
   }
 }
+const time = ref<number>(0)
+let timerId: number = 0
+// 发送验证码
+const sendCode = async () => {
+  if (time.value > 0) return
+  // 调用接口
+  const codeRes = await sendMobileCode(loginFrom.value.mobile, 'login')
+  // console.log('codeRes', codeRes)
+  // loginFrom.value.code = codeRes.data.code
+  showConfirmDialog({
+    message: `系统检测到验证码${codeRes.data.code}，是否允许粘贴？`
+  })
+    .then(() => {
+      // on confirm
+      loginFrom.value.code = codeRes.data.code
+    })
+    .catch(() => {
+      // on cancel
+    })
+
+  // 倒计时
+  showToast('发送成功')
+  time.value = 60
+  clearInterval(timerId)
+  timerId = setInterval(() => {
+    time.value--
+    if (time.value <= 0) clearInterval(timerId)
+  }, 1000)
+}
+// 当页面卸载的时候 清除定时器
+onUnmounted(() => {
+  window.clearInterval(timerId)
+})
 </script>
 <template>
   <div class="login__page">
@@ -77,7 +114,9 @@ const handlelogin = async () => {
       </van-field>
       <van-field v-model="loginFrom.code" :rules="codeRules" placeholder="请输入验证码" v-else>
         <template #button>
-          <span class="btn-send" style="color: #16c2a3">发送验证码</span>
+          <span :class="time > 0 ? ' active' : 'btn-send'" @click="sendCode">{{
+            time > 0 ? `${time} s后再次发送` : '发送验证码'
+          }}</span>
         </template>
       </van-field>
       <div class="cp__cell">
@@ -112,6 +151,14 @@ const handlelogin = async () => {
 
     .van-form {
       padding: 0 14px;
+
+      .btn-send {
+        color: var(--cp-primary);
+      }
+
+      .active {
+        color: #666;
+      }
 
       .cp__cell {
         height: 52px;

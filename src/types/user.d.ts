@@ -10,3 +10,6 @@ export type User = {
   /* 头像 */
   avatar: string
 }
+export type Code = {
+  code: string
+}
