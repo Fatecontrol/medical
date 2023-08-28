@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
@@ -14,9 +15,36 @@ const router = createRouter({
       component: () => import('../views/Register/index.vue')
     },
     {
-      path: '/user',
-      name: 'user',
-      component: () => import('../views/User/index.vue')
+      path: '/',
+      name: 'layout',
+      component: () => import('@/views/Layout/index.vue'),
+      redirect: '/home',
+      children: [
+        {
+          path: 'home',
+          name: 'home',
+          meta: { title: '首页' },
+          component: () => import('@/views/Home/index.vue')
+        },
+        {
+          path: 'article',
+          name: 'article',
+          meta: { title: '健康百科' },
+          component: () => import('@/views/Article/index.vue')
+        },
+        {
+          path: 'notify',
+          name: 'notify',
+          meta: { title: '消息中心' },
+          component: () => import('@/views/Notify/index.vue')
+        },
+        {
+          path: 'user',
+          name: 'user',
+          meta: { title: '我的' },
+          component: () => import('@/views/User/index.vue')
+        }
+      ]
     }
   ]
 })

@@ -40,7 +40,7 @@ const handlelogin = async () => {
 
     // console.log(loginRes)
     // 跳转到主页
-    router.replace((route.query.returnUrl as string) || '/user')
+    router.replace((route.query.returnUrl as string) || '/')
     // 提示登录成功
     showToast('登录成功')
   } catch (error) {
@@ -53,6 +53,8 @@ let timerId: number = 0
 const sendCode = async () => {
   if (time.value > 0) return
   // 调用接口
+  // 倒计时
+  showToast('发送成功')
   const codeRes = await sendMobileCode(loginFrom.value.mobile, 'login')
   // console.log('codeRes', codeRes)
   // loginFrom.value.code = codeRes.data.code
@@ -67,8 +69,6 @@ const sendCode = async () => {
       // on cancel
     })
 
-  // 倒计时
-  showToast('发送成功')
   time.value = 60
   clearInterval(timerId)
   timerId = setInterval(() => {
