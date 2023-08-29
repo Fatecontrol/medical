@@ -66,6 +66,7 @@
         :key="index"
         :title="item.label"
         is-link
+        :to="item.path"
         :border="false"
       >
         <template #icon>
