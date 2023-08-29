@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 const router = useRouter()
-const props = defineProps({
-  title: String,
-  rightText: String
-})
+const props = defineProps<{
+  title?: any
+  rightText?: any
+  back?: () => void
+}>()
 
 const onClickLeft = () => {
+  if (props.back) {
+    return props.back()
+  }
+
   // 判断是否有历史记录  有：返回上一页  有：进入主页
   if (history.state?.back) {
     router.back()

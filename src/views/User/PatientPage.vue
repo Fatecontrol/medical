@@ -9,10 +9,10 @@
           <span class="sex">{{ item.gender ? '男' : '女' }}</span>
           <span class="age">{{ item.age }}岁</span>
         </div>
-        <div class="icon"><cp-icons name="user-edit"></cp-icons></div>
+        <div class="icon" @click="handleEdit(item)"><cp-icons name="user-edit"></cp-icons></div>
         <div class="tag" v-if="item.defaultFlag">默认</div>
       </div>
-      <div class="patient__add" v-if="list && list.length < 6">
+      <div class="patient__add" v-if="list && list.length < 6" @click="showPopup">
         <cp-icons name="user-add"></cp-icons>
         <div>添加患者</div>
       </div>
@@ -20,14 +20,127 @@
         <span>最多可添加6人</span>
       </div>
     </div>
-    <cp-radio-btn></cp-radio-btn>
+    <!-- 右侧弹出 -->
+    <van-popup v-model:show="show" position="right">
+      <cp-nav-bar
+        :back="backPopup"
+        :title="PatientFrom.id ? '编辑患者' : '添加患者'"
+        right-text="保存"
+        @click-right="clickRight"
+      ></cp-nav-bar>
+      <van-form autocomplete="off">
+        <van-cell-group inset>
+          <van-field v-model="PatientFrom.name" label="真实姓名" placeholder="请输入真实姓名" />
+          <van-field v-model="PatientFrom.idCard" label="身份证号" placeholder="请输入身份证号" />
+          <van-field label="性别">
+            <template #input>
+              <cp-radio-btn :options="options" v-model="PatientFrom.gender"></cp-radio-btn>
+            </template>
+          </van-field>
+          <van-field label="默认就诊人">
+            <template #input>
+              <van-checkbox v-model="defaultFlag"></van-checkbox>
+            </template>
+          </van-field>
+        </van-cell-group>
+      </van-form>
+      <van-action-bar v-if="PatientFrom.id">
+        <van-action-bar-button @click="remove">删除</van-action-bar-button>
+      </van-action-bar>
+    </van-popup>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getPatientList } from '@/services/patient'
-import { ref, onMounted } from 'vue'
-import type { PatientList } from '@/types/user'
+const options = [
+  { label: '男', value: 1 },
+  { label: '女', value: 0 }
+]
+import { showToast, showConfirmDialog } from 'vant'
+import { getPatientList, addPatient, editPatient, delPatient } from '@/services/patient'
+import { ref, onMounted, computed } from 'vue'
+import type { PatientList, PatientType } from '@/types/user'
+import Validator from 'id-validator'
+// 控制弹出层显示隐藏
+const show = ref(false)
+// 开启弹出层
+const showPopup = () => {
+  show.value = true
+  PatientFrom.value = { ...initPatient }
+}
+// 关闭弹出层
+const backPopup = () => {
+  show.value = false
+}
+
+// 编辑
+const handleEdit = (obj: PatientType) => {
+  show.value = true
+  PatientFrom.value = { ...obj }
+}
+const initPatient: PatientType = {
+  name: '',
+  idCard: '',
+  gender: 1,
+  defaultFlag: 0
+}
+const PatientFrom = ref<PatientType>({ ...initPatient })
+// 删除
+const remove = () => {
+  showConfirmDialog({
+    title: '温馨提示',
+    message: `您确定要删除${PatientFrom.value.name}患者信息吗？`,
+    confirmButtonColor: 'var(--cp-primary)'
+  })
+    .then(async () => {
+      const patientRes = await delPatient(PatientFrom.value.id as string)
+      await initPatientList()
+      if (patientRes.code === 10000) {
+        showToast('删除成功')
+      } else {
+        showToast(patientRes.message)
+      }
+      show.value = false
+      // on confirm
+    })
+    .catch(() => {
+      // on cancel
+    })
+}
+// 保存
+const clickRight = async () => {
+  if (!PatientFrom.value.name) return showToast('请输入真实姓名')
+  if (!PatientFrom.value.idCard) return showToast('请输入身份证号')
+  const validator = new Validator()
+  if (!validator.isValid(PatientFrom.value.idCard)) return showToast('身份证格式错误')
+  const { sex } = validator.getInfo(PatientFrom.value.idCard)
+  if (PatientFrom.value.gender !== sex) return showToast('性别和身份证不符')
+  const patientRes = PatientFrom.value.id
+    ? await editPatient({
+        name: PatientFrom.value.name,
+        idCard: PatientFrom.value.idCard,
+        gender: PatientFrom.value.gender,
+        defaultFlag: PatientFrom.value.defaultFlag,
+        id: PatientFrom.value.id
+      })
+    : await addPatient(PatientFrom.value)
+  await initPatientList()
+  if (patientRes.code === 10000) {
+    showToast(PatientFrom.value.id ? '编辑成功' : '添加成功')
+  } else {
+    showToast(patientRes.message)
+  }
+  show.value = false
+}
+
+const defaultFlag = computed({
+  get() {
+    return PatientFrom.value.defaultFlag === 1 ? true : false
+  },
+  set(value) {
+    PatientFrom.value.defaultFlag = value ? 1 : 0
+  }
+})
 // 创建一个变量，保存患者列表
 const list = ref<PatientList>()
 
@@ -45,8 +158,31 @@ onMounted(() => {
 <style lang="scss" scoped>
 .patient__page {
   padding: 46px 0 80px;
+
+  ::v-deep() {
+    .van-popup {
+      width: 100%;
+      height: 100%;
+    }
+
+    .van-action-bar {
+      padding: 0 10px;
+      margin-bottom: 10px;
+
+      .van-button {
+        color: var(--cp-price);
+        background-color: var(--cp-bg);
+      }
+    }
+
+    .van-form {
+      margin-top: 46px;
+    }
+  }
+
   &__list {
     padding: 15px;
+
     .patient__item {
       background: var(--cp-bg);
       padding: 15px;
@@ -58,31 +194,37 @@ onMounted(() => {
       border: 1px solid var(--cp-bg);
       transition: all 0.3s;
       overflow: hidden;
+
       .info {
         display: flex;
         flex-wrap: wrap;
         flex: 1;
+
         span {
           color: var(--cp-tip);
           margin-right: 20px;
           line-height: 30px;
+
           &.name {
             font-size: 16px;
             color: var(--cp-text1);
             width: 80px;
             margin-right: 0;
           }
+
           &.id {
             width: 180px;
             color: var(--cp-text1);
           }
         }
       }
+
       .icon {
         color: var(--cp-tag);
         width: 20px;
         text-align: center;
       }
+
       .tag {
         position: absolute;
         background: var(--cp-primary);
@@ -97,16 +239,19 @@ onMounted(() => {
         top: 21px;
       }
     }
+
     .patient__add {
       background: var(--cp-bg);
       color: var(--cp-primary);
       padding: 15px 0;
       border-radius: 8px;
       text-align: center;
+
       .cp-icon {
         font-size: 24px;
       }
     }
+
     .patient__tip {
       color: var(--cp-tag);
       padding: 12px 0;
