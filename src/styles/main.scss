@@ -23,6 +23,11 @@
   // 默认按钮文字大小
   --van-button-normal-font-size: 16px;
 
+  // 进度条
+  #nprogress .bar {
+    background-color: var(--cp-primary) !important;
+  }
+
   .van-tabs {
     .van-tabs__nav {
       padding: 0 0 15px 0;

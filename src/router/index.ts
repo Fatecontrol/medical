@@ -1,4 +1,3 @@
-import { useUserStore } from '@/stores'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
