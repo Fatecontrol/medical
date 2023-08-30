@@ -14,14 +14,29 @@
   --cp-bg: #F6F7F9;
   --cp-price: #EB5757;
   // 覆盖vant的主题色
-  --van-button-primary-background : var(--cp-primary);
-  --van-button-primary-border-color : var(--cp-primary);
+  --van-button-primary-background: var(--cp-primary);
+  --van-button-primary-border-color: var(--cp-primary);
   // 单元格上下间距
   --van-cell-vertical-padding: 14px;
   // 复选框大小
   --van-checkbox-size: 14px;
   // 默认按钮文字大小
   --van-button-normal-font-size: 16px;
+
+  .van-tabs {
+    .van-tabs__nav {
+      padding: 0 0 15px 0;
+    }
+
+    .van-tabs__line {
+      width: 20px;
+      background-color: var(--cp-primary);
+    }
+
+    .van-tab {
+      padding: 0 15px;
+    }
+  }
 }
 
 body {
