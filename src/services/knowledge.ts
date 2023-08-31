@@ -4,7 +4,8 @@ import type {
   KnowledgePage,
   DoctorPage,
   PageParams,
-  FollowType
+  FollowType,
+  TopDep
 } from '@/types/consult'
 // 获取文章列表
 export const getKnowledgePage = (params: KnowledgeParams) => {
@@ -18,3 +19,5 @@ export const getDoctorPage = (params: PageParams) => {
 export const followDoctor = (id: string, type: FollowType = 'doc') => {
   return request('/like', 'POST', { id, type })
 }
+// 获取科室
+export const getAllDep = () => request<TopDep[]>('/dep/all')

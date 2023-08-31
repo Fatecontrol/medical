@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import type { Doctor } from '@/types/consult'
 // import { followDoctor } from '@/services/knowledge'
-import { useFollow } from '@/composable'
+import { useFollow } from '@/composable/useFollowDoctor'
 // import { ref } from 'vue'
 defineProps<{
   item: Doctor
@@ -68,3 +68,4 @@ const follow = async (doc: Doctor) => {
   }
 }
 </style>
+@/composable/useFollowDoctor

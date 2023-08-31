@@ -6,6 +6,7 @@ const pinia = createPinia()
 pinia.use(persist)
 
 export * from './user'
+export * from './consult'
 
 // 导出pinia实例，在main使用
 export default pinia

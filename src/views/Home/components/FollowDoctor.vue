@@ -19,6 +19,7 @@ import DoctorCard from './DoctorCard.vue'
 import { getDoctorPage } from '@/services/knowledge'
 import type { DoctorList } from '@/types/consult'
 import { onMounted, ref } from 'vue'
+// import {useWindowSize} from '@vueuse/core'
 const list = ref<DoctorList>([])
 const loadData = async () => {
   const doctorRes = await getDoctorPage({ current: 1, pageSize: 5 })

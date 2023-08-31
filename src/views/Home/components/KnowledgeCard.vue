@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import type { Knowledge } from '@/types/consult'
-import { useFollow } from '@/composable'
+import { useFollow } from '@/composable/useFollowDoctor'
 const { loading, follow } = useFollow()
 defineProps<{
   item: Knowledge
@@ -135,3 +135,4 @@ defineProps<{
   }
 }
 </style>
+@/composable/useFollowDoctor
