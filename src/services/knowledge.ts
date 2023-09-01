@@ -5,7 +5,8 @@ import type {
   DoctorPage,
   PageParams,
   FollowType,
-  TopDep
+  TopDep,
+  Image
 } from '@/types/consult'
 // 获取文章列表
 export const getKnowledgePage = (params: KnowledgeParams) => {
@@ -21,3 +22,9 @@ export const followDoctor = (id: string, type: FollowType = 'doc') => {
 }
 // 获取科室
 export const getAllDep = () => request<TopDep[]>('/dep/all')
+// 图片上传
+export const uploadImage = (file: File) => {
+  const fd = new FormData()
+  fd.append('file', file)
+  return request<Image>('/upload', 'POST', fd)
+}

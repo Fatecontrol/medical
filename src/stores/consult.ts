@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 // import persist from 'pinia-plugin-persistedstate'
-import type { PartialConsult } from '@/types/consult'
+import type { PartialConsult, ConsultIllness } from '@/types/consult'
 import type { ConsultType, IllnessType } from '@/types/enums'
 export const useConsultStore = defineStore(
   'cp-consult',
@@ -33,9 +33,7 @@ export const useConsultStore = defineStore(
       consult.value.consultFlag = consultFlag
     } */
     // 设置问诊信息（病情描述 病情持续时间 是否就诊过 患者图片数组）
-    const setIllness = (
-      illness: Pick<PartialConsult, 'illnessDesc' | 'illnessTime' | 'consultFlag' | 'pictures'>
-    ) => {
+    const setIllness = (illness: ConsultIllness) => {
       consult.value.illnessDesc = illness.illnessDesc
       consult.value.illnessTime = illness.illnessTime
       consult.value.consultFlag = illness.consultFlag

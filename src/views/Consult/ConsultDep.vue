@@ -6,9 +6,14 @@
         <van-sidebar-item v-for="item in allDep" :key="item.id" :title="item.name" />
       </van-sidebar>
       <div class="sub__dep">
-        <router-link to="/consult/illness" v-for="item in subDep" :key="item.id">{{
-          item.name
-        }}</router-link>
+        <router-link
+          to="/consult/illness"
+          v-for="item in subDep"
+          :key="item.id"
+          @click="store.setDepId(item.id)"
+        >
+          <van-image round :src="item.avatar" />{{ item.name }}</router-link
+        >
       </div>
     </div>
   </div>
@@ -18,6 +23,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { getAllDep } from '@/services/knowledge'
 import type { TopDep } from '@/types/consult'
+import { useConsultStore } from '@/stores'
+const store = useConsultStore()
 const active = ref(0)
 const allDep = ref<TopDep[]>([])
 const subDep = computed(() => {
@@ -61,7 +68,10 @@ onMounted(async () => {
       flex: 1;
       height: 100%;
       overflow-y: auto;
-
+      .van-image {
+        vertical-align: middle;
+        width: 60px;
+      }
       > a {
         display: block;
         padding: 14px 30px;

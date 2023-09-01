@@ -114,12 +114,19 @@ export type Consult = {
 // 问诊记录-全都可选
 export type PartialConsult = Partial<Consult>
 
+export type ConsultIllness = Pick<
+  PartialConsult,
+  'illnessDesc' | 'illnessTime' | 'consultFlag' | 'pictures'
+>
+
 // 一级科室列表
 export type SubDep = {
   // 科室ID
   id: string
   // 科室名称
   name: string
+  // 头像
+  avatar?: string
 }
 export type TopDep = SubDep & {
   // 二级科室数组

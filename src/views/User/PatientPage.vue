@@ -1,8 +1,19 @@
 <template>
   <div class="patient__page">
-    <cp-nav-bar title="家庭档案"></cp-nav-bar>
+    <cp-nav-bar :title="isChange ? '选择患者' : '家庭档案'"></cp-nav-bar>
+    <!-- 头部信息 -->
+    <div class="patient__page__change" v-if="isChange">
+      <h3>请选择患者信息</h3>
+      <p>以便医生给出更准确的治疗，信息仅医生可见</p>
+    </div>
     <div class="patient__page__list">
-      <div class="patient__item" v-for="item in list" :key="item.id">
+      <div
+        class="patient__item"
+        v-for="item in list"
+        :key="item.id"
+        :class="{ selected: patientId == item.id }"
+        @click="selectPatient(item)"
+      >
         <div class="info">
           <span class="name">{{ item.name }}</span>
           <span class="id">{{ item.idCard.replace(/^(.{6})(?:\d+)(.{4})$/, '\$1******$2') }}</span>
@@ -20,6 +31,16 @@
         <span>最多可添加6人</span>
       </div>
     </div>
+    <!-- 底部按钮 -->
+    <van-button
+      class="patient__page__next"
+      v-if="isChange"
+      type="primary"
+      block
+      round
+      @click="handleNext"
+      >下一步</van-button
+    >
     <!-- 右侧弹出 -->
     <van-popup v-model:show="show" position="right">
       <cp-nav-bar
@@ -56,11 +77,30 @@ const options = [
   { label: '男', value: 1 },
   { label: '女', value: 0 }
 ]
+import { useRoute, useRouter } from 'vue-router'
+import { useConsultStore } from '@/stores'
 import { showToast, showConfirmDialog } from 'vant'
 import { getPatientList, addPatient, editPatient, delPatient } from '@/services/patient'
 import { ref, onMounted, computed } from 'vue'
 import type { PatientList, PatientType } from '@/types/user'
 import Validator from 'id-validator'
+// 是否为选择患者
+const route = useRoute()
+const router = useRouter()
+const store = useConsultStore()
+const isChange = computed(() => route.query.isChange === '1')
+const handleNext = () => {
+  if (!patientId.value) return showToast('请选择就诊患者')
+  store.setPatientId(patientId.value)
+  router.push('/consult/pay')
+}
+// 默认选中
+const patientId = ref<string>()
+const selectPatient = (item: PatientType) => {
+  if (isChange.value) {
+    patientId.value = item.id
+  }
+}
 // 控制弹出层显示隐藏
 const show = ref(false)
 // 开启弹出层
@@ -147,8 +187,13 @@ const list = ref<PatientList>()
 // 初始化列表数据
 const initPatientList = async () => {
   const patientRes = await getPatientList()
-  console.log('patientRes', patientRes)
+  // console.log('patientRes', patientRes)
   list.value = patientRes.data
+  // 设置默认选中的ID，当页面为选择患者并且有患者信息
+  if (isChange.value && list.value.length) {
+    const defPatient = list.value.find((item) => item.defaultFlag === 1)
+    patientId.value = defPatient ? defPatient.id : list.value[0].id
+  }
 }
 onMounted(() => {
   initPatientList()
@@ -158,6 +203,30 @@ onMounted(() => {
 <style lang="scss" scoped>
 .patient__page {
   padding: 46px 0 80px;
+
+  &__change {
+    padding: 15px;
+
+    > h3 {
+      font-weight: normal;
+      margin-bottom: 5px;
+    }
+
+    > p {
+      color: var(--cp-text3);
+    }
+  }
+
+  &__next {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    font-size: 16px;
+    margin-bottom: 30px;
+    // 覆盖vant的主题色
+    --van-button-primary-background: var(--cp-primary);
+    --van-button-primary-border-color: var(--cp-primary);
+  }
 
   ::v-deep() {
     .van-popup {
@@ -182,6 +251,11 @@ onMounted(() => {
 
   &__list {
     padding: 15px;
+
+    .selected {
+      border-color: var(--cp-primary) !important;
+      background: #e8f8f6 !important;
+    }
 
     .patient__item {
       background: var(--cp-bg);
