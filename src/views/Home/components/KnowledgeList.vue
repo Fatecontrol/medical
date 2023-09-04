@@ -32,7 +32,7 @@ const params = ref<KnowledgeParams>({
 const onLoad = async () => {
   // 加载数据
   const knowledgeRes = await getKnowledgePage(params.value)
-  console.log('knowledgeRes', knowledgeRes)
+  // console.log('knowledgeRes', knowledgeRes)
 
   list.value.push(...knowledgeRes.data.rows)
 

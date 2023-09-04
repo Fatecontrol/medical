@@ -132,3 +132,20 @@ export type TopDep = SubDep & {
   // 二级科室数组
   child: SubDep[]
 }
+
+// 问诊订单预支付信息
+export type ConsultOrderPreParams = pick<PartialConsult, 'type' | 'illnessType'>
+
+// 问诊订单支付信息
+export type ConsultOrderPreData = {
+  // 积分抵扣
+  pointDeduction: number
+  // 优惠券抵扣
+  couponDeduction: number
+  // 优惠券ID
+  couponId: string
+  // 需付款
+  payment: number
+  // 实付款
+  actualPayment: number
+}

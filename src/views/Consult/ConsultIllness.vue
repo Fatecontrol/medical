@@ -53,7 +53,7 @@ const store = useConsultStore()
 import type { ConsultIllness, Image } from '@/types/consult'
 import { IllnessTime, ConsultFlag } from '@/types/enums'
 import type { UploaderAfterRead, UploaderFileListItem } from 'vant/lib/uploader/types'
-import { uploadImage } from '@/services/knowledge'
+import { uploadImage } from '@/services/consult'
 const timeOptions = [
   { label: '一周内', value: IllnessTime.Week },
   { label: '一月内', value: IllnessTime.Month },

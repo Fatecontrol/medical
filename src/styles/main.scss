@@ -13,6 +13,7 @@
   --cp-line: #EDEDED;
   --cp-bg: #F6F7F9;
   --cp-price: #EB5757;
+
   // 覆盖vant的主题色
   --van-button-primary-background: var(--cp-primary);
   --van-button-primary-border-color: var(--cp-primary);
@@ -22,6 +23,7 @@
   --van-checkbox-size: 14px;
   // 默认按钮文字大小
   --van-button-normal-font-size: 16px;
+
 
   // 进度条
   #nprogress .bar {
