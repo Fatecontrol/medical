@@ -15,8 +15,8 @@
   --cp-price: #EB5757;
 
   // 覆盖vant的主题色
-  --van-button-primary-background: var(--cp-primary);
-  --van-button-primary-border-color: var(--cp-primary);
+  --van-button-primary-background: var(--cp-primary) !important;
+  --van-button-primary-border-color: var(--cp-primary) !important;
   // 单元格上下间距
   --van-cell-vertical-padding: 14px;
   // 复选框大小

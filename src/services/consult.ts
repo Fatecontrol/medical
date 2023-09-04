@@ -4,7 +4,9 @@ import type {
   Image,
   ConsultOrderPreParams,
   ConsultOrderPreData,
-  PartialConsult
+  PartialConsult,
+  ConsultOrderListParams,
+  ConsultOrderPage
 } from '@/types/consult'
 // 获取科室
 export const getAllDep = () => request<TopDep[]>('/dep/all')
@@ -29,4 +31,16 @@ export const getConsultOrderPayUrl = (params: {
   payCallback: string
 }) => {
   return request<{ payUrl: string }>('/patient/consult/pay', 'POST', params)
+}
+// 获取问诊记录
+export const getConsultOrderList = (params: ConsultOrderListParams) => {
+  return request<ConsultOrderPage>('/patient/consult/order/list', 'GET', params)
+}
+// 取消订单
+export const cancelOrder = (id: string | number) => {
+  return request(`/patient/order/cancel/${id}`, 'PUT')
+}
+// 删除订单
+export const deleteOrder = (id: string | number) => {
+  return request(`/patient/order/${id}`, 'DELETE')
 }

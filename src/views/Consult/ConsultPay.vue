@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
-import { showToast, showLoadingToast, showConfirmDialog } from 'vant'
+import { showToast, showLoadingToast, showConfirmDialog, showDialog } from 'vant'
 import { useConsultStore } from '@/stores'
 import { getConsultOrderPre, createConsultOrder, getConsultOrderPayUrl } from '@/services/consult'
 import { getPatientDetail } from '@/services/user'
@@ -108,12 +108,16 @@ const orderId = ref('')
 // 获取订单
 const onSubmit = async () => {
   if (!isAgree.value) return showToast('请先勾选我已同意')
-  loading.value = true
-  const orderRes = await createConsultOrder(store.consult)
-  // console.log('orderRes', orderRes)
-  orderId.value = orderRes.data.id
-  loading.value = false
-  show.value = true
+  try {
+    loading.value = true
+    const orderRes = await createConsultOrder(store.consult)
+    // console.log('orderRes', orderRes)
+    orderId.value = orderRes.data.id
+    show.value = true
+    store.clear()
+  } finally {
+    loading.value = false
+  }
 }
 // 生成订单不可关闭支付抽屉
 const onClose = () => {
@@ -177,21 +181,14 @@ onMounted(() => {
     !store.consult.depId ||
     !store.consult.patientId
   ) {
-    return showConfirmDialog({
+    return showDialog({
       title: '温馨提示',
       message: '问诊信息不完整请重新填写，如有未支付的问诊订单可在问诊记录中继续支付',
       closeOnPopstate: false
+    }).then(() => {
+      // on confirm
+      router.push('/')
     })
-      .then(() => {
-        // on confirm
-        router.push('/')
-      })
-      .catch(() => {
-        // on cancel
-        orderId.value = ''
-        router.push('/user/consult')
-        return true
-      })
   }
 })
 // 生成订单信息不可回退

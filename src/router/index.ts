@@ -1,7 +1,7 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/login',
@@ -56,6 +56,12 @@ const router = createRouter({
       name: 'pay',
       meta: { title: '问诊支付' },
       component: () => import('@/views/Consult/ConsultPay.vue')
+    },
+    {
+      path: '/room',
+      name: 'room',
+      meta: { title: '医生问诊室' },
+      component: () => import('@/views/Room/room.vue')
     },
     {
       path: '/',

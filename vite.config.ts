@@ -26,6 +26,8 @@ export default defineConfig({
     }
   },
   server: {
+    port: 80,
+    host: true,
     proxy: {
       '/dev-api': {
         target: 'https://consult-api.itheima.net',
