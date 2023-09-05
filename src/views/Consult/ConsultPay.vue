@@ -40,53 +40,20 @@
       @submit="onSubmit"
     />
     <!-- 动作面板 -->
-    <van-action-sheet
+    <cp-pay-sheet
       v-model:show="show"
-      title="请选择支付方式"
-      :close-on-popstate="false"
-      :closeable="false"
-      :close-on-click-overlay="false"
-      @click-overlay="onClose"
-    >
-      <div class="pay-type">
-        <p class="amount">￥{{ payInfo?.actualPayment.toFixed(2) }}</p>
-        <van-cell-group>
-          <van-cell title="微信支付" @click="paymentMethod = 0">
-            <template #icon>
-              <cp-icons name="consult-wechat"></cp-icons>
-            </template>
-            <template #extra>
-              <van-checkbox
-                :checked="paymentMethod === 0"
-                checked-color="var(--cp-primary)"
-              ></van-checkbox>
-            </template>
-          </van-cell>
-          <van-cell title="支付宝支付" @click="paymentMethod = 1">
-            <template #icon>
-              <cp-icons name="consult-alipay"></cp-icons>
-            </template>
-            <template #extra>
-              <van-checkbox
-                :checked="paymentMethod === 1"
-                checked-color="var(--cp-primary)"
-              ></van-checkbox>
-            </template>
-          </van-cell>
-        </van-cell-group>
-        <div class="btn">
-          <van-button type="primary" round block @click="pay">立即支付</van-button>
-        </div>
-      </div>
-    </van-action-sheet>
+      :onClose="onClose"
+      :orderId="orderId"
+      :actualPayment="payInfo?.actualPayment"
+    ></cp-pay-sheet>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
-import { showToast, showLoadingToast, showConfirmDialog, showDialog } from 'vant'
+import { showToast, showConfirmDialog, showDialog } from 'vant'
 import { useConsultStore } from '@/stores'
-import { getConsultOrderPre, createConsultOrder, getConsultOrderPayUrl } from '@/services/consult'
+import { getConsultOrderPre, createConsultOrder } from '@/services/consult'
 import { getPatientDetail } from '@/services/user'
 import type { ConsultOrderPreData } from '@/types/consult'
 import type { PatientType } from '@/types/user'
@@ -97,8 +64,8 @@ const store = useConsultStore()
 const isAgree = ref<boolean>(false)
 // 动作面板
 const show = ref<boolean>(false)
-// 支付方式
-const paymentMethod = ref<0 | 1>()
+/* // 支付方式
+const paymentMethod = ref<0 | 1>() */
 // 支付信息
 const payInfo = ref<ConsultOrderPreData>()
 // 患者信息
@@ -113,8 +80,12 @@ const onSubmit = async () => {
     const orderRes = await createConsultOrder(store.consult)
     // console.log('orderRes', orderRes)
     orderId.value = orderRes.data.id
-    show.value = true
+
+    // TODO 清空pinia中存储的订单状态
     store.clear()
+
+    show.value = true
+    // store.clear()
   } finally {
     loading.value = false
   }
@@ -139,7 +110,7 @@ const onClose = () => {
       return true
     })
 }
-// 跳转到支付页面
+/* // 跳转到支付页面
 const pay = async () => {
   if (paymentMethod.value === undefined) return showToast('请选择支付方式')
   showLoadingToast({
@@ -154,7 +125,7 @@ const pay = async () => {
   })
   // console.log('payRes', payRes)
   window.location.href = payRes.data.payUrl
-}
+} */
 // 获取支付信息
 const loadData = async () => {
   const payRes = await getConsultOrderPre({

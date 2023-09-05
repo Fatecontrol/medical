@@ -46,7 +46,9 @@
       <h3>订单信息</h3>
       <van-cell-group :border="false">
         <van-cell title="订单编号">
-          <template #value> <span class="copy">复制</span> {{ detailInfo.orderNo }} </template>
+          <template #value>
+            <span class="copy" @click="onCopy">复制</span> {{ detailInfo.orderNo }}
+          </template>
         </van-cell>
         <van-cell title="创建时间" :value="detailInfo.createTime" />
         <van-cell title="应付款" :value="`￥${detailInfo.payment}`" />
@@ -55,14 +57,64 @@
         <van-cell title="实付款" :value="`￥${detailInfo?.actualPayment}`" class="price" />
       </van-cell-group>
     </div>
-    <div class="detail__action van-hairline--top">
+    <div class="detail__action van-hairline--top" v-if="detailInfo.status === OrderType.ConsultPay">
       <div class="price">
         <span>需付款</span> <span>￥{{ detailInfo.actualPayment }}</span>
       </div>
       <van-button type="default" round>取消问诊</van-button>
-      <van-button type="primary" round>继续支付</van-button>
+      <van-button :loading="loading" type="primary" round @click="showSheet">继续支付</van-button>
     </div>
+    <div
+      class="detail__action van-hairline--top"
+      v-if="detailInfo.status === OrderType.ConsultWait"
+    >
+      <van-button type="default" round>取消问诊</van-button>
+      <van-button type="primary" round :to="`/room?orderId=${detailInfo.id}`">继续沟通</van-button>
+    </div>
+
+    <div
+      class="detail__action van-hairline--top"
+      v-if="detailInfo.status === OrderType.ConsultChat"
+    >
+      <van-button
+        type="default"
+        round
+        v-if="detailInfo.prescriptionId"
+        @click="showPrescription(detailInfo.prescriptionId)"
+        >查看处方</van-button
+      >
+      <van-button type="primary" round :to="`/room?orderId=${detailInfo.id}`">继续沟通</van-button>
+    </div>
+    <div
+      class="detail__action van-hairline--top"
+      v-if="detailInfo.status === OrderType.ConsultComplete"
+    >
+      <ConsultMore
+        :disabled="!detailInfo.prescriptionId"
+        @on-delete="handleDeleteOrder(detailInfo)"
+        @on-preview="showPrescription(detailInfo.prescriptionId!)"
+      ></ConsultMore>
+      <van-button type="default" round :to="`/room?orderId=${detailInfo.id}`">问诊记录</van-button>
+      <van-button type="primary" round v-if="detailInfo.evaluateId">写评价</van-button>
+      <van-button type="default" round v-else>查看评价</van-button>
+    </div>
+    <div
+      class="detail__action van-hairline--top"
+      v-if="detailInfo.status === OrderType.ConsultCancel"
+    >
+      <van-button type="default" round>删除订单</van-button>
+      <van-button type="primary" round to="/">咨询其他医生</van-button>
+    </div>
+
+    <!-- 支付弹框 -->
+    <cp-pay-sheet
+      v-model:show="show"
+      :orderId="orderId"
+      :actualPayment="detailInfo.actualPayment"
+      :onClose="onClose"
+    ></cp-pay-sheet>
   </div>
+
   <!-- 骨架 -->
   <div class="consult__detail__page" v-else>
     <cp-nav-bar title="问诊详情" /> <van-skeleton title :row="4" style="margin-top: 30px" />
@@ -71,13 +123,20 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { OrderType } from '@/enum'
 import { getOrderDetail } from '@/services/consult'
 import type { ConsultOrderItem } from '@/types/consult'
 import { getIllnessTimeText, getConsultFlagText } from '@/utils/filter'
+import { showConfirmDialog, showToast } from 'vant'
+import ConsultMore from './components/ConsultMore.vue'
+// 查看处方 删除订单
+import useShowPrescription, { useDeleteOrder } from '@/composable/index'
+// 复制
+import { useClipboard } from '@vueuse/core'
 const route = useRoute()
+const router = useRouter()
 // 获取订单id
 const orderId = route.params.id as string
 // 获取订单数据详情
@@ -90,6 +149,46 @@ const initOrderDetail = async () => {
 onMounted(() => {
   initOrderDetail()
 })
+// 复制
+const { copy, isSupported } = useClipboard()
+const onCopy = async () => {
+  if (!isSupported) return showToast('暂未未授权,不支持此功能')
+  await copy(detailInfo.value?.orderNo || '')
+  showToast('已复制到剪切板')
+}
+// 查看处方
+const { showPrescription } = useShowPrescription()
+
+// 删除订单
+const { handleDeleteOrder } = useDeleteOrder(() => {
+  router.push('/user/consult')
+})
+
+// 弹框
+const show = ref(false)
+const loading = ref(false)
+const showSheet = () => {
+  show.value = true
+  loading.value = true
+}
+// 生成订单不可关闭支付抽屉
+const onClose = () => {
+  return showConfirmDialog({
+    title: '关闭支付',
+    message: '取消支付将无法获得医生回复，医生接诊名额有限，是否确认关闭？',
+    cancelButtonText: '仍要关闭',
+    confirmButtonText: '继续支付',
+    confirmButtonColor: 'var(--cp-primary)'
+  })
+    .then(() => {
+      // on confirm
+      return false
+    })
+    .catch(() => {
+      router.push('/user/consult')
+      return true
+    })
+}
 </script>
 
 <style lang="scss" scoped>

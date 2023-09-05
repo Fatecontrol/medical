@@ -35,7 +35,14 @@
         @click="handleCancelOrder(item)"
         >取消问诊</van-button
       >
-      <van-button type="primary" plain size="small" round>去支付</van-button>
+      <van-button
+        type="primary"
+        plain
+        size="small"
+        round
+        @click="$router.push(`/user/consult/${item.id}`)"
+        >去支付</van-button
+      >
     </div>
     <div class="foot" v-else-if="item.status === OrderType.ConsultWait">
       <van-button
@@ -67,11 +74,16 @@
       </van-button>
     </div>
     <div class="foot" v-if="item.status === OrderType.ConsultComplete">
-      <div class="more">
+      <!-- <div class="more">
         <van-popover placement="top-start" v-model:show="showPopover" :actions="actions">
           <template #reference> 更多 </template>
         </van-popover>
-      </div>
+      </div> -->
+      <ConsultMore
+        :disabled="!item.prescriptionId"
+        @onDelete="handleDeleteOrder(item)"
+        @onPreview="showPrescription(item.prescriptionId!)"
+      ></ConsultMore>
       <van-button class="gray" plain size="small" round :to="`/room?orderId=${item.id}`">
         问诊记录
       </van-button>
@@ -81,7 +93,13 @@
       <van-button v-else class="gray" plain size="small" round> 查看评价 </van-button>
     </div>
     <div class="foot" v-if="item.status === OrderType.ConsultCancel">
-      <van-button class="gray" plain size="small" round @click="handleDeleteOrder(item)"
+      <van-button
+        class="gray"
+        plain
+        size="small"
+        round
+        :loading="deleteLoading"
+        @click="handleDeleteOrder(item)"
         >删除订单</van-button
       >
       <van-button type="primary" plain size="small" round to="/">咨询其他医生</van-button>
@@ -92,22 +110,24 @@
 <script setup lang="ts">
 import type { ConsultOrderItem } from '@/types/consult'
 import { OrderType } from '@/enum'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { showToast } from 'vant'
-import { cancelOrder, deleteOrder } from '@/services/consult'
+import { cancelOrder } from '@/services/consult'
+// 引入组件
+import ConsultMore from './ConsultMore.vue'
 // 图片预览
-import useShowPrescription from '@/composable/index'
+import useShowPrescription, { useDeleteOrder } from '@/composable/index'
 const props = defineProps<{
   item: ConsultOrderItem
 }>()
 const emits = defineEmits<{
   (e: 'on-delete', id: number | string): void
 }>()
-const showPopover = ref(false)
+/* const showPopover = ref(false)
 const actions = computed(() => [
   { text: '查看处方', disabled: !props.item.prescriptionId },
   { text: '删除订单' }
-])
+]) */
 // 取消问诊
 const loading = ref(false)
 const handleCancelOrder = async (item: ConsultOrderItem) => {
@@ -124,7 +144,10 @@ const handleCancelOrder = async (item: ConsultOrderItem) => {
   }
 }
 // 删除订单
-const delloading = ref(false)
+const { deleteLoading, handleDeleteOrder } = useDeleteOrder((id) => {
+  emits('on-delete', id)
+})
+/* const delloading = ref(false)
 const handleDeleteOrder = async (item: ConsultOrderItem) => {
   delloading.value = true
   try {
@@ -136,7 +159,7 @@ const handleDeleteOrder = async (item: ConsultOrderItem) => {
   } finally {
     delloading.value = false
   }
-}
+} */
 // 查看处方
 const { showPrescription } = useShowPrescription()
 </script>
