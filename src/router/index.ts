@@ -64,6 +64,12 @@ const router = createRouter({
       component: () => import('@/views/Room/room.vue')
     },
     {
+      path: '/user/consult/:id',
+      name: 'detail',
+      meta: { title: '问诊详情' },
+      component: () => import('@/views/User/ConsultDeatil.vue')
+    },
+    {
       path: '/',
       name: 'layout',
       component: () => import('@/views/Layout/index.vue'),

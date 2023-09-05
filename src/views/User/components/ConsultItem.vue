@@ -11,7 +11,7 @@
         >{{ item.statusValue }}</span
       >
     </div>
-    <div class="body">
+    <div class="body" @click="$router.push(`/user/consult/${item.id}`)">
       <div class="body-row">
         <div class="body-label">病情描述</div>
         <div class="body-value">{{ item.illnessDesc }}</div>
@@ -52,7 +52,14 @@
       >
     </div>
     <div class="foot" v-if="item.status === OrderType.ConsultChat">
-      <van-button v-if="item.prescriptionId" class="gray" plain size="small" round>
+      <van-button
+        v-if="item.prescriptionId"
+        class="gray"
+        plain
+        size="small"
+        @click="showPrescription(item.prescriptionId)"
+        round
+      >
         查看处方
       </van-button>
       <van-button type="primary" plain size="small" round :to="`/room?orderId=${item.id}`">
@@ -88,6 +95,8 @@ import { OrderType } from '@/enum'
 import { ref, computed } from 'vue'
 import { showToast } from 'vant'
 import { cancelOrder, deleteOrder } from '@/services/consult'
+// 图片预览
+import useShowPrescription from '@/composable/index'
 const props = defineProps<{
   item: ConsultOrderItem
 }>()
@@ -128,6 +137,8 @@ const handleDeleteOrder = async (item: ConsultOrderItem) => {
     delloading.value = false
   }
 }
+// 查看处方
+const { showPrescription } = useShowPrescription()
 </script>
 
 <style lang="scss" scoped>
