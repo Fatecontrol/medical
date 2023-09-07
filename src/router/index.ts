@@ -16,12 +16,6 @@ const router = createRouter({
       component: () => import('../views/Register/index.vue')
     },
     {
-      path: '/order',
-      name: 'order',
-      meta: { title: '订单' },
-      component: () => import('@/views/Order/index.vue')
-    },
-    {
       path: '/user/patient',
       name: 'patient',
       meta: { title: '家庭档案' },
@@ -61,13 +55,37 @@ const router = createRouter({
       path: '/room',
       name: 'room',
       meta: { title: '医生问诊室' },
-      component: () => import('@/views/Room/room.vue')
+      component: () => import('@/views/Room/index.vue')
+    },
+    {
+      path: '/order/pay',
+      name: 'orderpay',
+      meta: { title: '药品支付' },
+      component: () => import('@/views/Order/OrderPay.vue')
     },
     {
       path: '/user/consult/:id',
       name: 'detail',
       meta: { title: '问诊详情' },
       component: () => import('@/views/User/ConsultDeatil.vue')
+    },
+    {
+      path: '/order/pay/result',
+      name: 'orderpayresult',
+      meta: { title: '药品支付结果' },
+      component: () => import('@/views/Order/OrderPayResult.vue')
+    },
+    {
+      path: '/order/:id',
+      name: 'orderdetail',
+      meta: { title: '药品订单详情' },
+      component: () => import('@/views/Order/OrderDetail.vue')
+    },
+    {
+      path: '/order/logistics/:id',
+      name: 'orderLogistics',
+      component: () => import('@/views/Order/OrderLogistics.vue'),
+      meta: { title: '物流详情' }
     },
     {
       path: '/',

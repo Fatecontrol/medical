@@ -36,7 +36,7 @@
       </van-row>
       <van-row>
         <van-col span="6">
-          <router-link to="/" class="nav min">
+          <router-link to="/order/pay" class="nav min">
             <cp-icons name="home-order"></cp-icons>
             <p class="title">药品订单</p>
           </router-link>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>根据城市设置城市中心点</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <style>
+    body,
+    html,
+    #container {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-family: "微软雅黑";
+    }
+    </style>
+    <script src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=Uu3mOEkqu972hmq70RGh6tbh54winpHt"></script>
+</head>
+
+<body>
+  <div id="container"></div>
+
+  <script>
+    var map = new BMapGL.Map('container'); // 创建Map实例
+    map.centerAndZoom('山西省运城市盐湖区龙居镇美玉村', 17); // 初始化地图,设置中心点坐标和地图级别
+    map.enableScrollWheelZoom(true); // 开启鼠标滚轮缩放
+    </script>
+</body>
+
+</html>

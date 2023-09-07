@@ -45,6 +45,7 @@
       :onClose="onClose"
       :orderId="orderId"
       :actualPayment="payInfo?.actualPayment"
+      payCallback="http://localhost/room"
     ></cp-pay-sheet>
   </div>
 </template>

@@ -190,7 +190,7 @@ const initPatientList = async () => {
   // console.log('patientRes', patientRes)
   list.value = patientRes.data
   // 设置默认选中的ID，当页面为选择患者并且有患者信息
-  if (isChange.value && list.value.length) {
+  if (isChange.value && list.value?.length) {
     const defPatient = list.value.find((item) => item.defaultFlag === 1)
     patientId.value = defPatient ? defPatient.id : list.value[0].id
   }
