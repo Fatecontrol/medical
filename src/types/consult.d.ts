@@ -321,6 +321,7 @@ export type DocInfo = {
 /**
  * 患者id,用于关联患者信息
  */
+// ,
 export type PatientInfo = {
   /**
    * 患者年龄
@@ -342,4 +343,10 @@ export type PatientInfo = {
    * 患者姓名
    */
   name: string
+  /* 性别 */
+  genderValue?: string
+  /* 时间 */
+  illnessTime?: IllnessTime
+  /* 有无就诊 */
+  illnessType: ?ConsultType
 }
