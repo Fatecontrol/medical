@@ -43,65 +43,82 @@
     </div>
 
     <!-- 发送文字 -->
-    <div class="room__message msg__to" v-if="item.msgType === MsgType.MsgText">
+    <div
+      class="room__message msg__to"
+      v-if="item.msgType === MsgType.MsgText && item.from === store.user?.id"
+    >
       <div class="content">
-        <div class="time">{{ item.createTime }}</div>
+        <div class="time">{{ formatTime(item.createTime) }}</div>
         <div class="pao">{{ item.msg.content }}</div>
       </div>
-      <van-image :src="item.toAvatar" />
+      <van-image :src="item.fromAvatar" />
     </div>
 
     <!-- 发送图片 -->
-    <div class="room__message msg__to" v-if="item.msgType === MsgType.MsgImage">
+    <div
+      class="room__message msg__to"
+      v-if="item.msgType === MsgType.MsgImage && item.from === store.user?.id"
+    >
       <div class="content">
-        <div class="time">{{ item.createTime }}</div>
-        <van-image
-          src="https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/popular_3.jpg"
-        />
+        <div class="time">{{ formatTime(item.createTime) }}</div>
+        <van-image @load="load" fit="contain" :src="item.msg.picture?.url" />
       </div>
-      <van-image src="https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/popular_3.jpg" />
+      <van-image :src="item.fromAvatar" />
+    </div>
+
+    <!-- 接收文字 -->
+    <div
+      class="room__message msg__from"
+      v-if="item.msgType === MsgType.MsgText && item.from !== store.user?.id"
+    >
+      <van-image :src="item.fromAvatar" />
+      <div class="content">
+        <div class="time">{{ formatTime(item.createTime) }}</div>
+        <div class="pao">{{ item.msg.content }}</div>
+      </div>
+    </div>
+
+    <!-- 接收图片 -->
+    <div
+      class="room__message msg__from"
+      v-if="item.msgType === MsgType.MsgImage && item.from !== store.user?.id"
+    >
+      <van-image :src="item.fromAvatar" />
+      <div class="content">
+        <div class="time">{{ formatTime(item.createTime) }}</div>
+        <van-image @load="load" fit="contain" :src="item.msg.picture?.url" />
+      </div>
+    </div>
+
+    <!-- 处方卡片 -->
+    <div class="room__message msg__recipe" v-if="item.msgType === MsgType.CardPre">
+      <div class="content" v-if="item.msg.prescription">
+        <div class="header van-hairline--bottom">
+          <div class="header__hit">
+            <h3>电子处方</h3>
+            <p @click="showPrescription(item.msg.prescription.id)">
+              原始处方 <van-icon name="arrow"></van-icon>
+            </p>
+          </div>
+          <p>
+            {{ item.msg.prescription.name }} {{ item.msg.prescription.genderValue }}
+            {{ item.msg.prescription.age }}岁 {{ item.msg.prescription.diagnosis }}
+          </p>
+          <p>开方时间：{{ item.msg.prescription.createTime }}</p>
+        </div>
+        <div class="body">
+          <div class="body__item" v-for="med in item.msg.prescription.medicines" :key="med.id">
+            <div class="durg">
+              <p>{{ med.name }} {{ med.specs }}</p>
+              <p>{{ med.usageDosag }}</p>
+            </div>
+            <div class="num">x{{ med.quantity }}</div>
+          </div>
+        </div>
+        <div class="foot"><span @click="buy(item.msg.prescription.id)">购买药品</span></div>
+      </div>
     </div>
   </template>
-
-  <!-- 接收文字 -->
-  <div class="room__message msg__from">
-    <van-image src="https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/popular_3.jpg" />
-    <div class="content">
-      <div class="time">20:12</div>
-      <div class="pao">哪里不舒服呀</div>
-    </div>
-  </div>
-  <!-- 接收图片 -->
-  <div class="room__message msg__from">
-    <van-image src="https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/popular_3.jpg" />
-    <div class="content">
-      <div class="time">20:12</div>
-      <van-image src="https://yjy-oss-files.oss-cn-zhangjiakou.aliyuncs.com/tuxian/popular_3.jpg" />
-    </div>
-  </div>
-  <!-- 处方卡片 -->
-  <div class="room__message msg__recipe">
-    <div class="content">
-      <div class="header van-hairline--bottom">
-        <div class="header__hit">
-          <h3>电子处方</h3>
-          <p>原始处方 <van-icon name="arrow"></van-icon></p>
-        </div>
-        <p>李富贵 男 31岁 血管性头痛</p>
-        <p>开方时间：2022-01-15 14:21:42</p>
-      </div>
-      <div class="body">
-        <div class="body__item" v-for="i in 2" :key="i">
-          <div class="durg">
-            <p>优赛明 维生素E乳</p>
-            <p>口服，每次1袋，每天3次，用药3天</p>
-          </div>
-          <div class="num">x1</div>
-        </div>
-      </div>
-      <div class="foot"><span>购买药品</span></div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -110,6 +127,12 @@ import type { Image } from '@/types/consult'
 import { getIllnessTimeText, getConsultFlagText } from '@/utils/filter'
 import { showImagePreview } from 'vant'
 import type { Message } from '@/types/room'
+import dayjs from 'dayjs'
+import { nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+import { useUserStore } from '@/stores'
+const store = useUserStore()
 defineProps<{
   list: Message[]
 }>()
@@ -119,6 +142,22 @@ const previewImg = (pictures: Image[]) => {
     showImagePreview(pictures.map((item) => item.url))
   }
 }
+// 格式化时间
+const formatTime = (time: number | string) => {
+  return dayjs(time).format('HH:mm')
+}
+const buy = (id: string) => {
+  router.push(`/order/pay?id=${id}`)
+}
+
+const load = async () => {
+  await nextTick()
+  window.scrollTo(0, document.body.scrollHeight)
+}
+
+import useShowPrescription from '@/composable/index'
+// 查看处方
+const { showPrescription } = useShowPrescription()
 </script>
 
 <style lang="scss" scoped>

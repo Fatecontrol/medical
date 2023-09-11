@@ -42,9 +42,15 @@ const handleGetMedicalOrderLogistics = async () => {
   console.log(res)
   logistics.value = res.data
 }
-onMounted(async () => {
-  handleGetMedicalOrderLogistics()
+handleGetMedicalOrderLogistics()
+// 引入
+import AMapLoader from '@amap/amap-jsapi-loader'
+// 地图配置
+window._AMapSecurityConfig = {
+  securityJsCode: 'd30ce9fed4281acd9e14657c0552ed7d'
+}
 
+onMounted(async () => {
   AMapLoader.load({
     key: '4ca8b3b485e99733ce53de1296607079',
     version: '2.0'
@@ -66,7 +72,7 @@ onMounted(async () => {
         hideMarkers: true
       })
 
-      /*    if (logistics.value?.logisticsInfo && logistics.value?.logisticsInfo.length >= 2) {
+      /*  if (logistics.value?.logisticsInfo && logistics.value?.logisticsInfo.length >= 2) {
         const list = [...logistics.value.logisticsInfo]
         // 起点
         let startLngLat = list.shift()
@@ -165,12 +171,6 @@ onMounted(async () => {
     })
   })
 })
-// 引入
-import AMapLoader from '@amap/amap-jsapi-loader'
-// 地图配置
-window._AMapSecurityConfig = {
-  securityJsCode: 'd30ce9fed4281acd9e14657c0552ed7d'
-}
 </script>
 
 <style lang="scss" scoped>

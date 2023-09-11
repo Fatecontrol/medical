@@ -1,15 +1,30 @@
 <template>
   <div class="room__status">
-    <div class="wait">已通知医生尽快接诊,24小时内医生未回复将自动退款</div>
-    <!-- <div class="chat">
-        <span>咨询中</span>
-        <span>剩余时间：23:10:34</span>
-      </div>
-      <div class="end"><van-icon name="passed"></van-icon>已结束</div> -->
+    <div class="wait" v-if="status === OrderType.ConsultWait">
+      已通知医生尽快接诊,24小时内医生未回复将自动退款
+    </div>
+    <div class="chat" v-if="status === OrderType.ConsultChat">
+      <span>咨询中</span>
+      <span
+        >剩余时间：<van-count-down style="display: inline-block" :time="countdown! * 1000"
+      /></span>
+    </div>
+    <div
+      class="end"
+      v-if="status === OrderType.ConsultComplete || status === OrderType.ConsultCancel"
+    >
+      <van-icon name="passed"></van-icon>已结束
+    </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { OrderType } from '@/enum'
+defineProps<{
+  status?: OrderType
+  countdown?: number
+}>()
+</script>
 
 <style lang="scss" scoped>
 .room__status {

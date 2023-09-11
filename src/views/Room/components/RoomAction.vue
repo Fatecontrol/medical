@@ -6,15 +6,45 @@
       :border="false"
       autocomplete="off"
       class="input"
-      :disabled="true"
+      :disabled="disabled"
+      v-model="text"
+      @keyup.enter="sendText"
     />
-    <van-uploader :preview-image="false" :disabled="true">
+    <van-uploader :preview-image="false" :disabled="disabled" :after-read="afterRead">
       <cp-icons name="consult-img"></cp-icons>
     </van-uploader>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { showLoadingToast, closeToast, showToast } from 'vant'
+import { uploadImage } from '@/services/consult'
+import { ref } from 'vue'
+defineProps<{
+  disabled: boolean
+}>()
+const emit = defineEmits<{
+  (e: 'sendText', text: string): void
+  (e: 'sendImage', data: { id: string; url: string }): void
+}>()
+const text = ref<string>('')
+// 向父组件传递输入框的内容 父组件通过websocket发送给服务端
+const sendText = () => {
+  if (text.value.trim() === '') return showToast('请输入内容')
+  emit('sendText', text.value)
+  text.value = ''
+}
+// 图片上传
+const afterRead = async (data: any) => {
+  // console.log(data)
+  if (!data.file) return
+  showLoadingToast('正在上传')
+  const imgRes = await uploadImage(data.file)
+  console.log(imgRes)
+  closeToast()
+  emit('sendImage', imgRes.data)
+}
+</script>
 
 <style lang="scss" scoped>
 .room__action {

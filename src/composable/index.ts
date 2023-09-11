@@ -1,6 +1,6 @@
 import { getPrescriptionPic, deleteOrder } from '@/services/consult'
 import type { ConsultOrderItem } from '@/types/consult'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 // 图片预览
 import { showImagePreview, showToast } from 'vant'
 export default function useShowPrescription() {
@@ -45,16 +45,11 @@ export function useCancelOrder() {
 import { getMedicalOrderDetail } from '@/services/order'
 import type { OrderDetail } from '@/types/order'
 export const useOrderDetail = (id: string) => {
-  const loading = ref(false)
   const order = ref<OrderDetail>()
-  onMounted(async () => {
-    loading.value = true
-    try {
-      const res = await getMedicalOrderDetail(id)
-      order.value = res.data
-    } finally {
-      loading.value = false
-    }
-  })
-  return { order, loading }
+  const getDetail = async () => {
+    const res = await getMedicalOrderDetail(id)
+    order.value = res.data
+  }
+  getDetail()
+  return { order }
 }
